@@ -5,6 +5,7 @@ import validator from "validator";
 import { Helmet } from "react-helmet";
 // firebase
 import { auth, googleProvider } from "../firebase";
+import { signInWithPopup } from "firebase/auth";
 // mui
 import {
   Container,
@@ -52,40 +53,26 @@ const AuthUser = () => {
   const [otpErr, setOtpErr] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
 
-  const handleGoogleAuth = () => {
+  const handleGoogleAuth = async () => {
     setIsGglLoading(true);
-    console.log("authentication started");
-    auth
-      .signInWithPopup(googleProvider)
-      .then((res) => {
-        console.log("res auth", res.user);
-        const email = res.user.email;
-        axios
-          .post(AUTH_EMAIL_ENDPOINT, { email })
-          .then((res) => {
-            const { token } = res.data;
-            // storing token
-            const localData =
-              JSON.parse(localStorage.getItem(LOCALSTORAGE)) || {};
-            localStorage.setItem(
-              LOCALSTORAGE,
-              JSON.stringify({ ...localData, token })
-            );
-            setToken(token);
-            // back to home
-            navigate(HOME_ROUTE);
-            // resets
-            setIsGglLoading(false);
-          })
-          .catch((err) => {
-            console.log(err);
-            setIsGglLoading(false);
-          });
-      })
-      .catch((err) => {
-        console.log(err);
-        setIsGglLoading(false);
-      });
+    try {
+      console.log("authentication started");
+      const result = await signInWithPopup(auth, googleProvider);
+      const email = result.user.email;
+      const res = await axios.post(AUTH_EMAIL_ENDPOINT, { email });
+      const { token } = res.data;
+      const localData = JSON.parse(localStorage.getItem(LOCALSTORAGE)) || {};
+      localStorage.setItem(
+        LOCALSTORAGE,
+        JSON.stringify({ ...localData, token })
+      );
+      setToken(token);
+      navigate(HOME_ROUTE);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsGglLoading(false);
+    }
   };
 
   const generateOtp = (e) => {
