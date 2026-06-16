@@ -1,7 +1,7 @@
 import { Avatar, Box, Typography, Button } from "@mui/material";
 import { formattedDate } from "../../../utils";
 
-const UsersRowColumns = ({setChangeRoleDialog, setSelectedUser}) => {
+const UsersRowColumns = ({setChangeRoleDialog, setSelectedUser, onDeleteUser}) => {
   return [
     {
       label: "Name",
@@ -90,6 +90,21 @@ const UsersRowColumns = ({setChangeRoleDialog, setSelectedUser}) => {
             Change Role
           </Button>
         )
+      }
+    },
+    {
+      label: "Delete",
+      width: 2,
+      value: (x) => {
+        return (
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => onDeleteUser && onDeleteUser(x)}
+          >
+            Delete
+          </Button>
+        );
       }
     }
   ].filter(Boolean);

@@ -1,6 +1,6 @@
 import { Box, Typography, Button } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
-import { USER_GET_ENDPOINT } from "../../../constants/endpoints.js";
+import { USER_GET_ENDPOINT, USER_DELETE_ENDPOINT } from "../../../constants/endpoints.js";
 import AppContext from "../../../contexts/AppContext.js";
 import axios from "axios";
 import Table from "../../../components/table/Table.js";
@@ -52,6 +52,19 @@ const Users = () => {
     });
   };
 
+  const deleteUser = async (user) => {
+    if (!window.confirm(`Delete ${user.name || user.email}?`)) return;
+    try {
+      await axios.delete(USER_DELETE_ENDPOINT, {
+        headers: { Authorization: "Bearer " + token },
+        data: { query: JSON.stringify({ _id: user._id }) },
+      });
+      fetch();
+    } catch (err) {
+      console.error("Delete user error", err);
+    }
+  };
+
   const searchReset = () => {
     if (data.current && data.current.length > 0) {
       setUsers(data.current);
@@ -82,7 +95,7 @@ const Users = () => {
       {users.length > 0 ? (
          <Table
           items={users}
-          columns={UsersRowColumns({setChangeRoleDialog,setSelectedUser})}
+          columns={UsersRowColumns({setChangeRoleDialog,setSelectedUser,onDeleteUser: deleteUser})}
           header={true}
           rowStyles={{
             cursor: "pointer",
